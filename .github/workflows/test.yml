@@ -1,0 +1,57 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # Windows also runs the tests on .NET Framework 4.8 (the netstandard2.0 build).
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - run: dotnet test Esgo.slnx -c Release
+
+  generated-code-is-current:
+    # src/Esgo/Generated must be exactly what tools/Generate makes from openapi.json.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet run --project tools/Generate -- --offline
+      - run: git diff --exit-code -- src/Esgo/Generated
+
+  package:
+    # Builds the NuGet package and checks its dependencies (shipped to customers).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet pack src/Esgo/Esgo.csproj -c Release -o artifacts
+      - run: dotnet list src/Esgo/Esgo.csproj package --include-transitive --format json | python3 .github/scripts/check-dependencies.py
+
+  licenses:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v4
+        with:
+          allow-licenses: MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC

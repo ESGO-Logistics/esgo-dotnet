@@ -1,0 +1,3 @@
+# LF in the repo on every OS, so the generated code is byte-identical
+# between Windows and the GitHub runners (test.yml checks it).
+* text=auto eol=lf

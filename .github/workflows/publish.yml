@@ -1,0 +1,66 @@
+name: publish
+
+# Runs when a GitHub release is published. Uploads to nuget.org via Trusted
+# Publishing (no stored API key); the environment "nuget" waits for a reviewer.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Tag must match the package version
+        run: |
+          version=$(dotnet msbuild src/Esgo/Esgo.csproj -getProperty:Version)
+          if [ "v$version" != "${{ github.event.release.tag_name }}" ]; then
+            echo "Tag ${{ github.event.release.tag_name }} does not match Version $version in src/Esgo/Esgo.csproj"
+            exit 1
+          fi
+
+      - run: dotnet test Esgo.slnx -c Release
+      - run: dotnet pack src/Esgo/Esgo.csproj -c Release -o artifacts
+      - run: dotnet list src/Esgo/Esgo.csproj package --include-transitive --format json | python3 .github/scripts/check-dependencies.py
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts/
+
+  nuget:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/Esgo
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: nupkg
+          path: artifacts/
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Short-lived API key from the trusted publishing policy (owner: ESGO-Logistics).
+      - name: NuGet login (OIDC -> temporary API key)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      # Pushes the .nupkg; the .snupkg next to it goes to the symbol server.
+      - run: dotnet nuget push "artifacts/*.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

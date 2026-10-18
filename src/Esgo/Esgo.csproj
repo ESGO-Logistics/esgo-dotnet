@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Esgo</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- NuGet package -->
+    <PackageId>Esgo</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>ESGO Logistics UG (haftungsbeschränkt)</Authors>
+    <Company>ESGO Logistics UG (haftungsbeschränkt)</Company>
+    <Copyright>Copyright (c) 2026 ESGO Logistics UG (haftungsbeschränkt)</Copyright>
+    <Description>Official .NET SDK for the ESGO API: matching search for empty truck runs and open transport requests.</Description>
+    <PackageTags>esgo;logistics;freight;api;sdk</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://es-go.de/developers</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ESGO-Logistics/esgo-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/ESGO-Logistics/esgo-dotnet/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <InternalsVisibleTo Include="Esgo.Tests" />
+  </ItemGroup>
+
+  <!-- Only dependency, and only where the runtime does not ship it (MIT). -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Text.Json" Version="10.0.13" />
+  </ItemGroup>
+</Project>

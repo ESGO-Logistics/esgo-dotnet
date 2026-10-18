@@ -1,0 +1,58 @@
+name: regenerate
+
+# Daily: fetch the live spec, regenerate src/Esgo/Generated and open a pull
+# request when the contract changed. Nothing is released automatically.
+
+on:
+  schedule:
+    - cron: "27 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - run: dotnet run --project tools/Generate
+
+      - name: Run tests on the new spec
+        id: tests
+        continue-on-error: true
+        run: dotnet test Esgo.slnx -c Release
+
+      - name: Summarise test result
+        id: summary
+        run: |
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            echo "result=Tests pass on the new spec." >> "$GITHUB_OUTPUT"
+          else
+            echo "result=**Tests fail on the new spec.** A new operation probably needs an entry in src/Esgo/Operations.cs and src/Esgo/Resources (see OperationsTests). Push the fix to this branch." >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          branch: spec-update
+          delete-branch: true
+          add-paths: |
+            openapi.json
+            src/Esgo/Generated
+          commit-message: "Spec-Update: openapi.json und generierter Code"
+          title: "Spec-Update von api.es-go.de"
+          body: |
+            The live spec at https://api.es-go.de/v1/openapi.json changed.
+            This pull request updates `openapi.json` and `src/Esgo/Generated`.
+
+            ${{ steps.summary.outputs.result }}
+
+            Review the diff of `openapi.json` to see what changed in the contract.
+            Pull requests opened by this workflow do not start `test.yml`; the
+            test result above comes from this run.

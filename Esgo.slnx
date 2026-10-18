@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Esgo/Esgo.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Esgo.Tests/Esgo.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Generate/Generate.csproj" />
+  </Folder>
+</Solution>
