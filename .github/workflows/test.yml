@@ -52,6 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/dependency-review-action@v4
+      - uses: actions/dependency-review-action@v5
         with:
           allow-licenses: MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC
