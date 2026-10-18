@@ -123,6 +123,7 @@ catch (EsgoApiException e)
 - API reference: [api.es-go.de/v1/docs](https://api.es-go.de/v1/docs)
 - OpenAPI spec: [api.es-go.de/v1/openapi.json](https://api.es-go.de/v1/openapi.json)
 - Python SDK: [pypi.org/project/esgo](https://pypi.org/project/esgo/)
+- MCP server for AI assistants: [pypi.org/project/esgo-mcp](https://pypi.org/project/esgo-mcp/) ([source](https://github.com/ESGO-Logistics/esgo-mcp))
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
