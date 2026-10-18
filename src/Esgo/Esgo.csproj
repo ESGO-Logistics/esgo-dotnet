@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+    <!-- net462: own .NET Framework build so NuGet adds the System.Net.Http reference for
+         customers (EsgoClient takes an HttpClient); netstandard2.0 covers Mono, Unity etc. -->
+    <TargetFrameworks>netstandard2.0;net462;net8.0;net10.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>Esgo</RootNamespace>
@@ -9,7 +11,7 @@
 
     <!-- NuGet package -->
     <PackageId>Esgo</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>ESGO Logistics UG (haftungsbeschränkt)</Authors>
     <Company>ESGO Logistics UG (haftungsbeschränkt)</Company>
     <Copyright>Copyright (c) 2026 ESGO Logistics UG (haftungsbeschränkt)</Copyright>
@@ -37,7 +39,12 @@
   </ItemGroup>
 
   <!-- Only dependency, and only where the runtime does not ship it (MIT). -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net462'">
     <PackageReference Include="System.Text.Json" Version="10.0.13" />
+  </ItemGroup>
+
+  <!-- Becomes a frameworkAssembly entry in the package, so .NET Framework projects get it automatically. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 </Project>

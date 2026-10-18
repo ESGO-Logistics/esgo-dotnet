@@ -4,6 +4,12 @@ All notable changes to this package are documented here. Versions follow
 [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may
 contain breaking changes; they are marked as such.
 
+## 0.1.1 (2026-10-18)
+
+- Fix: .NET Framework projects no longer need a manual reference to
+  `System.Net.Http`. The package now has its own `net462` build, and NuGet
+  adds the reference automatically.
+
 ## 0.1.0 (2026-10-18)
 
 First release, all endpoints of API v1.
